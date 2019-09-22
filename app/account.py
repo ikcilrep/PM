@@ -1,4 +1,4 @@
-from app.security.AES import encrypt, decrypt
+from security.AES import encrypt, decrypt
 
 # Decrypts dictionary encrypted_account and returns Account object with decrypted data.
 
