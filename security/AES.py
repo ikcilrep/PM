@@ -7,9 +7,6 @@ from os import urandom
 
 backend = default_backend()
 pkcs7 = padding.PKCS7(128)
-padder = pkcs7.padder()
-unpadder = pkcs7.unpadder()
-
 
 # Returns pbkdf2 derivators: one for key, one for IV.
 def get_derivators(saltKey, saltIV):
@@ -19,6 +16,7 @@ def get_derivators(saltKey, saltIV):
 
 # Returns tuple (saltKey, saltIV, encrypted_data), where encrypted_data is data encrypted with AES and salts are random bytes.
 def encrypt(data, password):
+    padder = pkcs7.padder()
     saltKey, saltIV = urandom(16), urandom(16)
     pbkdf2Key, pbkdf2IV = get_derivators(saltKey,saltIV)
     password = password.encode('utf-8')
@@ -30,6 +28,7 @@ def encrypt(data, password):
 
 # Returns returns decrypted data. 
 def decrypt(encrypted_data, password):
+    unpadder = pkcs7.unpadder()
     saltKey, saltIV = encrypted_data[0], encrypted_data[1]
     pbkdf2Key, pbkdf2IV = get_derivators(saltKey,saltIV)
     password = password.encode('utf-8')
@@ -37,4 +36,4 @@ def decrypt(encrypted_data, password):
     IV = pbkdf2IV.derive(password)
     cipher = Cipher(algorithms.AES(key), modes.CBC(IV), backend=backend)
     decryptor = cipher.decryptor()
-    return (decryptor.update(encrypted_data[2]) + decryptor.finalize()).decode('utf-8')
+    return (unpadder.update(decryptor.update(encrypted_data[2]) + decryptor.finalize()) + unpadder.finalize()).decode('utf-8')
