@@ -14,4 +14,3 @@ def generate_password(length, should_have_whitespaces, should_have_punctuation, 
     if should_have_digits:
         characters += digits
     return ''.join(characters[randbelow(len(characters))] for _ in range(length))
-

@@ -32,6 +32,5 @@ class Account:
     def __eq__(self, other):
         return isinstance(other, Account) and self.service_name == other.service_name and self.username == other.username and self.email == other.email and self.password == other.password
 
-
     def __neq__(self, other):
         return not self == other
