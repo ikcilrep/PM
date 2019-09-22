@@ -18,7 +18,8 @@ def get_derivators(saltKey, saltIV):
                           salt=saltIV, iterations=100000, backend=backend)
     return pbkdf2Key, pbkdf2IV
 
-# Returns tuple (saltKey, saltIV, encrypted_data), where encrypted_data is data encrypted with AES and salts are random bytes.
+# Returns dictionary with keys 'saltKey', 'saltIV', 'ciphertext',
+# where ciphertext is encrypted data and salts are random bytes, each salt is 16 bytes length.
 
 
 def encrypt(data, password):
@@ -30,18 +31,18 @@ def encrypt(data, password):
     IV = pbkdf2IV.derive(password)
     cipher = Cipher(algorithms.AES(key), modes.CBC(IV), backend=backend)
     encryptor = cipher.encryptor()
-    return (saltKey, saltIV, encryptor.update(padder.update(data.encode('utf-8')) + padder.finalize()) + encryptor.finalize())
+    return {'saltKey': saltKey, 'saltIV': saltIV, 'ciphertext': encryptor.update(padder.update(data.encode('utf-8')) + padder.finalize()) + encryptor.finalize()}
 
 # Returns returns decrypted data.
 
 
 def decrypt(encrypted_data, password):
     unpadder = pkcs7.unpadder()
-    saltKey, saltIV = encrypted_data[0], encrypted_data[1]
+    saltKey, saltIV = encrypted_data['saltKey'], encrypted_data['saltIV']
     pbkdf2Key, pbkdf2IV = get_derivators(saltKey, saltIV)
     password = password.encode('utf-8')
     key = pbkdf2Key.derive(password)
     IV = pbkdf2IV.derive(password)
     cipher = Cipher(algorithms.AES(key), modes.CBC(IV), backend=backend)
     decryptor = cipher.decryptor()
-    return (unpadder.update(decryptor.update(encrypted_data[2]) + decryptor.finalize()) + unpadder.finalize()).decode('utf-8')
+    return (unpadder.update(decryptor.update(encrypted_data['ciphertext']) + decryptor.finalize()) + unpadder.finalize()).decode('utf-8')
