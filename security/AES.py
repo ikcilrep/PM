@@ -11,38 +11,24 @@ pkcs7 = padding.PKCS7(128)
 # Returns pbkdf2 derivators: one for key, one for IV.
 
 
-def get_derivators(saltKey, saltIV):
-    pbkdf2Key = PBKDF2HMAC(algorithm=SHA256, length=32,
-                           salt=saltKey, iterations=100000, backend=backend)
-    pbkdf2IV = PBKDF2HMAC(algorithm=SHA256, length=16,
-                          salt=saltIV, iterations=100000, backend=backend)
-    return pbkdf2Key, pbkdf2IV
-
-# Returns dictionary with keys 'saltKey', 'saltIV', 'ciphertext',
-# where ciphertext is encrypted data and salts are random bytes, each salt is 16 bytes length.
+def derive_key(password, salt=urandom(16)):
+    return {'key': PBKDF2HMAC(algorithm=SHA256, length=32, salt=salt, iterations=100000, backend=backend).derive(password.encode('utf-8')), 'salt': salt}
 
 
-def encrypt(data, password):
+# Returns dictionary with ciphertext ('ciphertext') and initialization vector ('IV').
+
+def encrypt(data, key):
     padder = pkcs7.padder()
-    saltKey, saltIV = urandom(16), urandom(16)
-    pbkdf2Key, pbkdf2IV = get_derivators(saltKey, saltIV)
-    password = password.encode('utf-8')
-    key = pbkdf2Key.derive(password)
-    IV = pbkdf2IV.derive(password)
-    cipher = Cipher(algorithms.AES(key), modes.CBC(IV), backend=backend)
-    encryptor = cipher.encryptor()
-    return {'saltKey': saltKey, 'saltIV': saltIV, 'ciphertext': encryptor.update(padder.update(data.encode('utf-8')) + padder.finalize()) + encryptor.finalize()}
+    IV = urandom(16)
+    encryptor = Cipher(algorithms.AES(key['key']), modes.CBC(IV),
+                       backend=backend).encryptor()
+    return {'ciphertext': encryptor.update(padder.update(data.encode('utf-8')) + padder.finalize()) + encryptor.finalize(), 'IV': IV}
 
 # Returns returns decrypted data.
 
 
-def decrypt(encrypted_data, password):
+def decrypt(encrypted_data, key):
     unpadder = pkcs7.unpadder()
-    saltKey, saltIV = encrypted_data['saltKey'], encrypted_data['saltIV']
-    pbkdf2Key, pbkdf2IV = get_derivators(saltKey, saltIV)
-    password = password.encode('utf-8')
-    key = pbkdf2Key.derive(password)
-    IV = pbkdf2IV.derive(password)
-    cipher = Cipher(algorithms.AES(key), modes.CBC(IV), backend=backend)
-    decryptor = cipher.decryptor()
+    decryptor = Cipher(algorithms.AES(key['key']), modes.CBC(
+        encrypted_data['IV']), backend=backend).decryptor()
     return (unpadder.update(decryptor.update(encrypted_data['ciphertext']) + decryptor.finalize()) + unpadder.finalize()).decode('utf-8')
