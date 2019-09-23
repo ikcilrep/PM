@@ -4,7 +4,8 @@ from security.AES import encrypt, decrypt
 
 
 def decrypt_account(encrypted_account, AES_key):
-    decrypted = {key: decrypt(
+    # 10: to remove 'encrypted_'
+    decrypted = {key[10:] decrypt(
         encrypted_account[key], AES_key) for key in encrypted_account}
     return Account(decrypted['service_name'], decrypted['username'], decrypted['email'], decrypted['password'])
 
@@ -23,10 +24,10 @@ class Account:
     # For each information separate IV is used.
     def encrypt(self, AES_key):
         return {
-            'service_name': encrypt(self.service_name, AES_key),
-            'username': encrypt(self.username, AES_key),
-            'email': encrypt(self.email, AES_key),
-            'password': encrypt(self.password, AES_key)
+            'encrypted_service_name': encrypt(self.service_name, AES_key),
+            'encrypted_username': encrypt(self.username, AES_key),
+            'encrypted_email': encrypt(self.email, AES_key),
+            'encrypted_password': encrypt(self.password, AES_key)
         }
 
     def __eq__(self, other):
