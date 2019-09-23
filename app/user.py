@@ -9,8 +9,14 @@ class User:
         self.AES_key = AES_key
         self.__hashed_password = hashed_password
         self.__password = password
-        self.encrypt = lambda: [self.accounts[key].encrypt(
-            self.AES_key) for key in self.accounts]
+        self.encrypt = lambda: {
+                'username': username,
+                'encrypted_accounts': [self.accounts[key].encrypt(self.AES_key) for key in self.accounts], 
+                'hashed_password': self.__hashed_password, 
+                'AES_key_salt': self.AES_key['salt']
+                }
+
+
 
     def assign_accounts(self, encrypted_accounts, AES_key):
         def add_account(self, account):
@@ -19,6 +25,7 @@ class User:
         self.accounts = {}
         for encrypted_account in encrypted_accounts:
             self.add_account(decrypt_account(encrypted_accounts, AES_key))
+    
 
     @property
     def password(self):
