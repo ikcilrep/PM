@@ -1,6 +1,6 @@
-from account import Account, decrypt_account
-from security.AES import derive_key
-from security.password_storing import hash_digest
+from app.account import Account, decrypt_account
+from app.security.AES import derive_key
+from app.security.password_storing import hash_digest
 
 # Returns decrypted user.
 
@@ -26,12 +26,15 @@ class User:
         self.AES_key = AES_key
         self.__hashed_password = hashed_password
         self.__password = password
-        self.encrypt = lambda: {
-            'username': username,
+       
+    def encrypt(self): 
+        return {
+            'username': self.username,
             'encrypted_accounts': [self.accounts[key].encrypt(self.AES_key) for key in self.accounts],
             'hashed_password': self.__hashed_password,
             'AES_key_salt': self.AES_key['salt']
         }
+
     def add_account(self, account):
         self.accounts[account.service_name] = account
 
@@ -40,7 +43,7 @@ class User:
 
     def assign_accounts(self, encrypted_accounts):
         for encrypted_account in encrypted_accounts:
-            self.add_account(decrypt_account(encrypted_accounts, self.AES_key))
+            self.add_account(decrypt_account(encrypted_account, self.AES_key))
 
     @property
     def password(self):

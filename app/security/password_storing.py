@@ -1,4 +1,4 @@
-from security.AES import backend, urandom
+from app.security.AES import backend, urandom
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
 # Returns new scrypt derivator. 

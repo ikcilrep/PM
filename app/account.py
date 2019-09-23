@@ -1,11 +1,11 @@
-from security.AES import encrypt, decrypt
+from app.security.AES import encrypt, decrypt
 
 # Decrypts dictionary encrypted_account and returns Account object with decrypted data.
 
 
 def decrypt_account(encrypted_account, AES_key):
     # 10: to remove 'encrypted_'
-    decrypted = {key[10:] decrypt(
+    decrypted = {key[10:]: decrypt(
         encrypted_account[key], AES_key) for key in encrypted_account}
     return Account(decrypted['service_name'], decrypted['username'], decrypted['email'], decrypted['password'])
 
