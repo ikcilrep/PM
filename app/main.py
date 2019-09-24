@@ -1,10 +1,12 @@
 from kivy.app import App
 from kivy.uix.widget import Widget
+from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.config import Config
-Config.set('graphics', 'resizable', '0') #0 being off 1 being on as in true/false
-Config.set('graphics', 'width', '400')
-Config.set('graphics', 'height', '200')
-class Menu(Widget):
+from kivy.core.window import Window
+Window.size = (400, 225) 
+Config.set('graphics', 'resizable', '0')
+
+class Menu(ScreenManager):
     pass
 
 class PasswordManagerApp(App):
