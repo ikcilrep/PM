@@ -1,6 +1,19 @@
 from app.account import Account, decrypt_account
 from app.security.AES import derive_key
-from app.security.password_storing import hash_digest
+from app.security.password_storing import hash_digest, verify_password
+
+
+def read_encrypted_user(username);
+    # To be implemented by nuparus
+    pass
+
+def login(username, password):
+    encrypted_user = read_encrypted_user(username)
+    assert verify_password(password, encrypted_user['hashed_password'])
+    return decrypt_user(encrypted_user, password)     
+
+def register(username, password):
+    return User(username, derive_key(password), password, hash_digest(password))
 
 # Returns decrypted user.
 
@@ -44,6 +57,12 @@ class User:
     def assign_accounts(self, encrypted_accounts):
         for encrypted_account in encrypted_accounts:
             self.add_account(decrypt_account(encrypted_account, self.AES_key))
+
+
+    def save(self):
+        to_save = self.encrypt()
+        # To be implemented by nuparus
+        pass
 
     @property
     def password(self):
