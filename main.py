@@ -5,6 +5,8 @@ from app.security.AES import derive_key
 from app.security.password_generator import generate_password
 from pyperclip import copy
 from getpass import getpass
+from os import path, mkdir
+
 
 def register(username, password):
     user = User(username, derive_key(password), password, hash_digest(password))
@@ -16,6 +18,9 @@ def ask(question, answers_set):
     while answer not in answers_set:
         answer = input(question)
     return answer
+
+if not path.exists('data'):
+    mkdir('data')
 
 
 print('Have you already got an account?')
