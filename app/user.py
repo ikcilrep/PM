@@ -1,19 +1,22 @@
 from app.account import Account, decrypt_account
 from app.security.AES import derive_key
-from app.security.password_storing import hash_digest, verify_password
+from app.security.password_storing import hash_digest
+from app.security.base64_str import *
+from os import path
+import json
+
+def get_path_by_username(username):
+    return path.join('data', 'data_' + username + '.json')
 
 
-def read_encrypted_user(username);
-    # To be implemented by nuparus
-    pass
+# Reads and returns encrypted user from file.
+def read_encrypted_user(username):
+    with open(get_path_by_username(username), 'r') as f:
+        return json.load(f)
 
-def login(username, password):
-    encrypted_user = read_encrypted_user(username)
-    assert verify_password(password, encrypted_user['hashed_password'])
-    return decrypt_user(encrypted_user, password)     
+def does_user_exist(username):
+    return path.exists(get_path_by_username(username))
 
-def register(username, password):
-    return User(username, derive_key(password), password, hash_digest(password))
 
 # Returns decrypted user.
 
@@ -34,7 +37,7 @@ def decrypt_user(encrypted_user, password):
 
 class User:
     def __init__(self, username, AES_key, password, hashed_password):
-        self.accounts = {}
+        self.accounts = [] 
         self.username = username
         self.AES_key = AES_key
         self.__hashed_password = hashed_password
@@ -43,13 +46,13 @@ class User:
     def encrypt(self): 
         return {
             'username': self.username,
-            'encrypted_accounts': [self.accounts[key].encrypt(self.AES_key) for key in self.accounts],
+            'encrypted_accounts': [account.encrypt(self.AES_key) for account in self.accounts],
             'hashed_password': self.__hashed_password,
             'AES_key_salt': self.AES_key['salt']
         }
 
     def add_account(self, account):
-        self.accounts[account.service_name] = account
+        self.accounts.append(account)
 
 
     # Decrypts and assigns accounts to this user.
@@ -60,9 +63,10 @@ class User:
 
 
     def save(self):
-        to_save = self.encrypt()
-        # To be implemented by nuparus
-        pass
+        encrypted = self.encrypt()
+        
+        with open(get_path_by_username(self.username), 'w') as f:
+          f.write(json.dumps(self.encrypt()))
 
     @property
     def password(self):
