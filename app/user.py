@@ -4,9 +4,11 @@ from app.security.password_storing import hash_digest
 from app.security.base64_str import *
 from os import path
 import json
+from base64 import urlsafe_b64encode
 
+# Returns unique path for every username.
 def get_path_by_username(username):
-    return path.join('data', 'data_' + username + '.json')
+    return path.join('data', 'data_' + urlsafe_b64encode(username.encode()).decode('ascii') + '.json')
 
 
 # Reads and returns encrypted user from file.
@@ -14,6 +16,7 @@ def read_encrypted_user(username):
     with open(get_path_by_username(username), 'r') as f:
         return json.load(f)
 
+# Returns true if user with given username exists.
 def does_user_exist(username):
     return path.exists(get_path_by_username(username))
 
