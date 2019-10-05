@@ -4,7 +4,7 @@ from app.security.base64_str import *
 
 # Returns new scrypt derivator. 
 def get_scrypt_derivator(salt): return Scrypt(
-    salt=salt, length=32, n=1048576, r=8, p=1, backend=backend)
+    salt=salt, length=32, n=16384, r=8, p=1, backend=backend)
 
 # Returns True if password match with stored hash.
 def verify_password(password, hash_digest): return to_b64_str(get_scrypt_derivator(
