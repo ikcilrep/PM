@@ -79,3 +79,4 @@ class User:
     def password(self, new_password):
         self.__password = new_password
         self.__hashed_password = hash_digest(new_password)
+        self.AES_key = derive_key(self.__password)
